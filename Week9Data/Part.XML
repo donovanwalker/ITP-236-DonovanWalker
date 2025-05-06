@@ -1,1 +1,56 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
+using System.Data.SqlClient;
+
+namespace Project2
+{
+    public class CreatePartXML
+    {
+        public static void GenerateXML()
+        {
+            // Donovan Walker
+            // Create a new Part.XML file
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            XmlWriter writer = XmlWriter.Create("Part.xml", settings);
+
+            writer.WriteStartDocument();
+            writer.WriteComment("Part Data");
+            writer.WriteStartElement("Parts");
+
+            // Use a SELECT statement to read the Sales.Part table
+            string connectionString = "Data Source=localhost;Initial Catalog=Sales;Integrated Security=True"; // Replace with your actual connection string
+            string selectQuery = "SELECT PartId, Name FROM Sales.Part";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(selectQuery, connection))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // Create Part Elements with attributes: PartId and Name.
+                            writer.WriteStartElement("Part");
+                            writer.WriteAttributeString("PartId", reader["PartId"].ToString());
+                            writer.WriteAttributeString("Name", reader["Name"].ToString());
+                            writer.WriteEndElement(); // Part
+                        }
+                    }
+                }
+            }
+
+            writer.WriteEndElement(); // Parts
+            writer.WriteEndDocument();
+
+            //Close the Part.XML document
+            writer.Close();
+
+            Console.WriteLine("Part.xml has been created.");
+        }
+    }
+}
 
